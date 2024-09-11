@@ -1,6 +1,5 @@
 
 import streamlit as st
-import replicate
 import os
 
 # Initialize session state for pipeline if not already present
@@ -65,8 +64,23 @@ elif tabs == "Node Properties":
                 st.slider(f"Node {idx} - Guidance Scale", 1.0, 10.0, 7.5, step=0.5)
                 st.slider(f"Node {idx} - Steps", 10, 100, 50, step=5)
 
+            elif model == "Upscale Image":
+                st.slider(f"Node {idx} - Scale Factor", 2, 4, 2, step=1)
+                st.slider(f"Node {idx} - Denoise Strength", 0.0, 1.0, 0.5, step=0.1)
+
+            elif model == "Remove Background":
+                st.slider(f"Node {idx} - Threshold", 0.0, 1.0, 0.5, step=0.1)
+
+            elif model == "Super Resolution":
+                st.slider(f"Node {idx} - Scale Factor", 2, 4, 2, step=1)
+                st.slider(f"Node {idx} - Denoise Strength", 0.0, 1.0, 0.5, step=0.1)
+
             elif model == "Text-to-Video":
                 st.text_area(f"Node {idx} - Enter a prompt for video generation")
+                st.slider(f"Node {idx} - Duration", 1, 30, 10, step=1)
+                st.slider(f"Node {idx} - Frame Rate", 10, 60, 24, step=2)
+
+            elif model == "Image-to-Video":
                 st.slider(f"Node {idx} - Duration", 1, 30, 10, step=1)
                 st.slider(f"Node {idx} - Frame Rate", 10, 60, 24, step=2)
 
@@ -74,6 +88,16 @@ elif tabs == "Node Properties":
                 st.text_area(f"Node {idx} - Enter a prompt for music generation")
                 st.slider(f"Node {idx} - Duration", 10, 300, 120, step=10)
                 st.selectbox(f"Node {idx} - Genre", ["Classical", "Pop", "Rock", "Electronic"])
+
+            elif model == "Voice Generation":
+                st.text_area(f"Node {idx} - Enter text to convert to voice")
+                st.selectbox(f"Node {idx} - Voice Style", ["Formal", "Casual", "Serious", "Happy"])
+                st.slider(f"Node {idx} - Pitch", 0.5, 2.0, 1.0, step=0.1)
+                st.slider(f"Node {idx} - Speed", 0.5, 2.0, 1.0, step=0.1)
+
+            elif model == "Audio Enhancement":
+                st.slider(f"Node {idx} - Noise Reduction Level", 0.0, 1.0, 0.5, step=0.1)
+                st.slider(f"Node {idx} - Gain Control", -10, 10, 0, step=1)
 
 # Input Section: Text or Image input as the base
 st.subheader("Pipeline Input")
