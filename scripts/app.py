@@ -1,5 +1,6 @@
 
 import streamlit as st
+import replicate
 import os
 
 # Initialize session state for pipeline if not already present
@@ -73,6 +74,37 @@ elif tabs == "Node Properties":
                 st.text_area(f"Node {idx} - Enter a prompt for music generation")
                 st.slider(f"Node {idx} - Duration", 10, 300, 120, step=10)
                 st.selectbox(f"Node {idx} - Genre", ["Classical", "Pop", "Rock", "Electronic"])
+
+# Input Section: Text or Image input as the base
+st.subheader("Pipeline Input")
+input_type = st.radio("Choose input type", ["Text", "Image"])
+
+if input_type == "Text":
+    user_input_text = st.text_area("Enter your text input for the pipeline")
+elif input_type == "Image":
+    user_input_image = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
+
+# Run the Pipeline Button
+if st.button("Run Pipeline"):
+    st.write("Running pipeline...")
+    
+    # Dummy processing flow for text input pipeline
+    if input_type == "Text" and user_input_text:
+        result = user_input_text
+        for model in st.session_state['pipeline']:
+            st.write(f"Processing {model}...")
+            # Dummy process for each model
+            result += f" -> Processed by {model}"
+        st.write(f"Final output: {result}")
+
+    # Dummy processing flow for image input pipeline
+    elif input_type == "Image" and user_input_image:
+        st.write(f"Processing image: {user_input_image.name}")
+        for model in st.session_state['pipeline']:
+            st.write(f"Processing {model}...")
+            # Dummy image process for each model (In reality, you'd run model predictions)
+            st.write(f"Image processed by {model}")
+        st.image(user_input_image, caption="Final Processed Image")
 
 # Display the current pipeline as a list of models added
 st.subheader("Current Pipeline")
