@@ -1,92 +1,73 @@
 
 import streamlit as st
-import replicate
-import os
 
-# Sidebar for API key input
+# Define tabs in the sidebar
 st.sidebar.title("AI Pipeline Builder")
-api_key = st.sidebar.text_input("Enter your Replicate API key:", type="password")
-if api_key:
-    os.environ["REPLICATE_API_TOKEN"] = api_key
-    st.sidebar.success("API key set successfully.")
 
-# Defining Categories and Models
-categories = {
-    'Image': ['Upscale Image', 'Remove Background', 'Super Resolution'],
-    'Video': ['Image to Video', 'Text to Video'],
-    'Audio': ['Text to Music', 'Voice Generation', 'Audio Enhancement'],
-    'Text': ['LLaMA (Text Generation)', 'Summarization', 'Sentiment Analysis', 'Text to Image']
-}
+tabs = st.sidebar.radio("Select a tab", ["API Settings", "Model Selection", "Node Properties"])
 
-# Sidebar for selecting category and model
-st.sidebar.title("Model Categories")
-selected_category = st.sidebar.selectbox("Select a category", list(categories.keys()))
-selected_model = st.sidebar.selectbox("Select a model", categories[selected_category])
+# Tab 1: API Settings
+if tabs == "API Settings":
+    st.sidebar.subheader("API Key")
+    api_key = st.sidebar.text_input("Enter your Replicate API key", type="password")
+    if api_key:
+        st.sidebar.success("API key saved.")
+        # Normally, we would save this API key in a secure location
 
-# Storing the pipeline of commands
-if 'pipeline' not in st.session_state:
-    st.session_state['pipeline'] = []
+# Tab 2: Model Selection
+elif tabs == "Model Selection":
+    st.sidebar.subheader("Select a Model Category")
+    model_category = st.sidebar.selectbox("Choose a category", ["Text", "Image", "Video", "Audio"])
 
-# Display selected model and its input options
-st.title(f"{selected_category} - {selected_model}")
-if st.button("Add to Pipeline"):
-    st.session_state['pipeline'].append((selected_category, selected_model))
-    st.success(f"Added {selected_model} to pipeline!")
+    if model_category == "Text":
+        selected_model = st.sidebar.selectbox("Choose a model", ["LLaMA (Text Generation)", "Summarization", "Sentiment Analysis", "Text-to-Image"])
+        st.write(f"Selected Model: {selected_model}")
+    
+    elif model_category == "Image":
+        selected_model = st.sidebar.selectbox("Choose a model", ["Stable Diffusion (Text-to-Image)", "Upscale Image", "Remove Background", "Super Resolution"])
+        st.write(f"Selected Model: {selected_model}")
 
-# Display current pipeline
-st.subheader("Current Pipeline")
-if st.session_state['pipeline']:
-    for idx, (category, model) in enumerate(st.session_state['pipeline']):
-        st.write(f"{idx + 1}. {category} - {model}")
-else:
-    st.write("No steps in the pipeline yet.")
+    elif model_category == "Video":
+        selected_model = st.sidebar.selectbox("Choose a model", ["Image-to-Video", "Text-to-Video"])
+        st.write(f"Selected Model: {selected_model}")
 
-# Execution logic for the pipeline
-if st.button("Execute Pipeline"):
-    st.write("Executing the AI pipeline...")
-    output_data = None
-    for idx, (category, model) in enumerate(st.session_state['pipeline']):
-        st.write(f"Running step {idx + 1}: {model}...")
+    elif model_category == "Audio":
+        selected_model = st.sidebar.selectbox("Choose a model", ["Text-to-Music", "Voice Generation", "Audio Enhancement"])
+        st.write(f"Selected Model: {selected_model}")
+
+# Tab 3: Node Properties
+elif tabs == "Node Properties":
+    st.sidebar.subheader("Node Properties")
+    st.sidebar.write("Here you can adjust the parameters for the selected model node.")
+    
+    # Display parameters based on the selected model from the Model Selection tab
+    if 'selected_model' in globals():
+        st.write(f"Adjust parameters for {selected_model}")
         
-        if model == 'Text to Image':
-            text_input = st.text_area("Enter a text prompt")
-            if text_input:
-                model = replicate.models.get("stability-ai/stable-diffusion")
-                output_data = model.predict(prompt=text_input)
-                st.image(output_data, caption="Generated Image")
+        # Example parameters for Text models
+        if selected_model == "LLaMA (Text Generation)":
+            st.sidebar.slider("Temperature", 0.1, 1.0, 0.7, step=0.1)
+            st.sidebar.slider("Max Tokens", 50, 500, 150, step=10)
+            st.sidebar.checkbox("Top-P Sampling", value=True)
+            st.sidebar.slider("Top-P Value", 0.1, 1.0, 0.9, step=0.1)
         
-        elif model == 'Upscale Image' and output_data:
-            model = replicate.models.get("upscaler/real-esrgan")
-            output_data = model.predict(image=output_data)
-            st.image(output_data, caption="Upscaled Image")
-        
-        elif model == 'Remove Background' and output_data:
-            model = replicate.models.get("rembg/rembg")
-            output_data = model.predict(image=output_data)
-            st.image(output_data, caption="Image without Background")
-        
-        elif model == 'Image to Video' and output_data:
-            model = replicate.models.get("image-to-video/model")
-            output_data = model.predict(image=output_data)
-            st.video(output_data)
-        
-        elif model == 'Text to Video':
-            text_input = st.text_area("Enter a text prompt")
-            if text_input:
-                model = replicate.models.get("text-to-video/model")
-                output_data = model.predict(prompt=text_input)
-                st.video(output_data)
-        
-        elif model == 'Text to Music':
-            text_input = st.text_area("Enter a text prompt for music generation")
-            if text_input:
-                model = replicate.models.get("text-to-music/model")
-                output_data = model.predict(prompt=text_input)
-                st.audio(output_data)
+        # Example parameters for Image models
+        elif selected_model == "Stable Diffusion (Text-to-Image)":
+            st.sidebar.slider("Prompt Strength", 0.0, 1.0, 0.8, step=0.1)
+            st.sidebar.slider("Image Resolution", 256, 1024, 512, step=128)
+            st.sidebar.slider("Guidance Scale", 1.0, 10.0, 7.5, step=0.5)
+            st.sidebar.slider("Steps", 10, 100, 50, step=5)
 
-    st.success("Pipeline executed successfully!")
-
-# Reset pipeline
-if st.button("Reset Pipeline"):
-    st.session_state['pipeline'] = []
-    st.success("Pipeline reset!")
+        # Example parameters for Video models
+        elif selected_model == "Text-to-Video":
+            st.sidebar.text_area("Enter a prompt for video generation")
+            st.sidebar.slider("Duration", 1, 30, 10, step=1)
+            st.sidebar.slider("Frame Rate", 10, 60, 24, step=2)
+        
+        # Example parameters for Audio models
+        elif selected_model == "Text-to-Music":
+            st.sidebar.text_area("Enter a prompt for music generation")
+            st.sidebar.slider("Duration", 10, 300, 120, step=10)
+            st.sidebar.selectbox("Genre", ["Classical", "Pop", "Rock", "Electronic"])
+    else:
+        st.write("No model selected.")
