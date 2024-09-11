@@ -1,5 +1,7 @@
 
 import streamlit as st
+import replicate
+import os
 
 # Define tabs in the sidebar
 st.sidebar.title("AI Pipeline Builder")
@@ -12,7 +14,7 @@ if tabs == "API Settings":
     api_key = st.sidebar.text_input("Enter your Replicate API key", type="password")
     if api_key:
         st.sidebar.success("API key saved.")
-        # Normally, we would save this API key in a secure location
+        os.environ["REPLICATE_API_TOKEN"] = api_key  # Set API key
 
 # Tab 2: Model Selection
 elif tabs == "Model Selection":
@@ -20,7 +22,7 @@ elif tabs == "Model Selection":
     model_category = st.sidebar.selectbox("Choose a category", ["Text", "Image", "Video", "Audio"])
 
     if model_category == "Text":
-        selected_model = st.sidebar.selectbox("Choose a model", ["LLaMA (Text Generation)", "Summarization", "Sentiment Analysis", "Text-to-Image"])
+        selected_model = st.sidebar.selectbox("Choose a model", ["LLaMA (Text Generation)", "Summarization", "Sentiment Analysis", "Stable Diffusion (Text-to-Image)"])
         st.write(f"Selected Model: {selected_model}")
     
     elif model_category == "Image":
